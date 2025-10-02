@@ -17,18 +17,18 @@ This is an AI-powered PDF Chatbot application that allows users to upload PDF do
 - **AI/ML**: FAISS for vector similarity search, sentence transformers for embeddings.
 - **Database**: SQLite for lightweight, file-based storage.
 - **Deployment**: Docker and Docker Compose for containerization.
-- **Hosting**: Ready for deployment on cloud platforms like Railway (free tier).
+- **Hosting**: Ready for deployment on cloud platforms like Render (free tier).
 
 ## Project Structure
 - `frontend/`: React app source code and Dockerfile for frontend container.
 - `backend/`: FastAPI backend source code and Dockerfile for backend container.
 - `docker-compose.yml`: Defines multi-container setup for frontend and backend.
-- `TODO.md`: Deployment instructions for hosting on Railway (free tier).
+- `TODO.md`: Deployment instructions for hosting on Render (free tier).
 
 ## Prerequisites
 - Docker and Docker Compose installed
 - GitHub account (for deployment)
-- Railway account (optional, for free hosting)
+- Render account (optional, for free hosting)
 
 ## How to Use
 1. **Upload a PDF**: Click the upload button and select a PDF file from your device.
@@ -48,7 +48,7 @@ This is an AI-powered PDF Chatbot application that allows users to upload PDF do
 4. Run `docker-compose up --build` to start production containers locally.
 
 ## Deployment
-Refer to `TODO.md` for detailed steps to deploy the app on Railway, a free cloud hosting platform supporting Docker Compose.
+Refer to `TODO.md` for detailed steps to deploy the app on Render, a free cloud hosting platform supporting Docker Compose.
 
 ## Environment Variables
 - `DATABASE_URL`: SQLite database URL for backend.

@@ -1,8 +1,8 @@
-# Hosting PDF Chatbot Application on Railway (Free Tier)
+# Hosting PDF Chatbot Application on Render (Free Tier)
 
 ## Prerequisites
 - GitHub account
-- Railway account (free at railway.app)
+- Render account (free at render.com)
 
 ## Steps to Deploy
 
@@ -10,31 +10,50 @@
    - Commit all changes (Dockerfiles, docker-compose.yml)
    - Push to a public GitHub repository
 
-2. **Deploy on Railway**
-   - Go to railway.app and sign up/login
-   - Click "New Project" > "Deploy from GitHub repo"
+2. **Deploy Backend on Render**
+   - Go to render.com and sign up/login
+   - Click "New" > "Web Service"
    - Connect your GitHub account and select the repository
-   - Railway will detect docker-compose.yml and deploy both services
+   - Set the following:
+     - **Name**: pdfchatbot-backend
+     - **Environment**: Docker
+     - **Branch**: main (or your branch)
+     - **Build Command**: (leave default)
+     - **Start Command**: (leave default, uses Dockerfile CMD)
+   - Add environment variable: `DATABASE_URL=sqlite:///./fastapi_app.db`
+   - Click "Create Web Service"
 
-3. **Configure Environment Variables (if needed)**
-   - In Railway dashboard, go to project settings
-   - Set any required env vars (e.g., if API_URL needs adjustment)
-   - For free tier, volumes are supported but limited
+3. **Deploy Frontend on Render**
+   - Click "New" > "Static Site"
+   - Connect the same GitHub repository
+   - Set the following:
+     - **Name**: pdfchatbot-frontend
+     - **Branch**: main
+     - **Build Command**: `npm run build`
+     - **Publish Directory**: `dist`
+   - Add environment variable: `VITE_API_URL=https://your-backend-service.onrender.com`
+     (Replace with the actual backend URL from step 2)
+   - Click "Create Static Site"
 
-4. **Access the Application**
-   - Once deployed, Railway provides a public URL for the frontend (port 80)
-   - Backend is internal, accessible via frontend
+4. **Update Frontend API URL**
+   - After backend is deployed, copy its URL
+   - Go to frontend static site settings and update `VITE_API_URL`
 
-5. **Test the Deployment**
-   - Visit the provided URL
+5. **Access the Application**
+   - Frontend URL: Provided by Render static site
+   - Backend URL: Provided by Render web service
+
+6. **Test the Deployment**
+   - Visit the frontend URL
    - Upload a PDF and test the chatbot
 
 ## Notes
-- Free tier includes $5/month credit, sufficient for low-traffic apps
+- Render free tier includes 750 hours/month for web services and unlimited static sites
 - Apps may sleep after inactivity, causing slight delay on first load
-- For persistent data (SQLite, FAISS indices), Railway provides volumes
+- For persistent data, consider using Render's managed databases (paid) or cloud storage
 
 ## Troubleshooting
-- Check Railway logs for build/deploy errors
-- Ensure docker-compose.yml is valid
-- If issues with service communication, adjust VITE_API_URL
+- Check Render logs for build/deploy errors
+- Ensure Dockerfile CMD is correct
+- Verify environment variables are set correctly
+- If CORS issues, check backend CORS settings
