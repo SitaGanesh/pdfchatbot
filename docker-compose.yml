@@ -1,0 +1,24 @@
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/faiss_indices:/app/faiss_indices
+      - ./backend/logs:/app/logs
+    environment:
+      - DATABASE_URL=sqlite:///./fastapi_app.db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      - backend

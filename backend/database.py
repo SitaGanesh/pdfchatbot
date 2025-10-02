@@ -5,10 +5,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# === HARD‑CODED DB URL (PostgreSQL) ===
-DATABASE_URL = "postgresql://postgres:ganesh%40captainamerica@localhost/fastapi_db"
-# If you ever want SQLite fallback, you can uncomment the following line:
-# DATABASE_URL = "sqlite:///./fastapi_app.db"
+# === Get DB URL from environment or fallback to hardcoded or SQLite ===
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:ganesh%40captainamerica@localhost/fastapi_db")
+# For SQLite fallback, you can set DATABASE_URL=sqlite:///./fastapi_app.db in .env or environment variables
 
 # Create SQLAlchemy engine
 engine = create_engine(

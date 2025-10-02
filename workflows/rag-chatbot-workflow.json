@@ -1,0 +1,55 @@
+{
+  "name": "RAG-powered FAQ Chatbot",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "ask"},
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {"functionCode": "const file = items[0].binary.file; /* parse PDF */"},
+      "name": "Preprocess Request",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {"model": "all-MiniLM-L6-v2", "operation": "embedDocuments"},
+      "name": "Embed Chunks",
+      "type": "n8n-nodes-base.vectorDb",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {"indexName": "pdf_chatbot_index", "topK": 3},
+      "name": "Find Similar Chunks",
+      "type": "n8n-nodes-base.vectorDb",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {"functionCode": "/* build prompt */ return items;"},
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {"resource": "chatCompletion", "operation": "create", "model": "gpt-3.5-turbo"},
+      "name": "Call OpenAI API",
+      "type": "n8n-nodes-base.openai",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {"functionCode": "return items;"},
+      "name": "Format Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": { "main": [[{"node":"Preprocess Request","type":"main","index":0}]] },
+    "Preprocess Request": { "main": [[{"node":"Embed Chunks","type":"main","index":0}]] },
+    "Embed Chunks": { "main": [[{"node":"Find Similar Chunks","type":"main","index":0}]] },
+    "Find Similar Chunks": { "main": [[{"node":"Build Prompt","type":"main","index":0}]] },
+    "Build Prompt": { "main": [[{"node":"Call OpenAI API","type":"main","index":0}]] },
+    "Call OpenAI API": { "main": [[{"node":"Format Response","type":"main","index":0}]] }
+  }
+}

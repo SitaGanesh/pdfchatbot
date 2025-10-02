@@ -1,7 +1,7 @@
 // frontend/src/components/Header.jsx
 
 import React from "react";
-import Logo from "../assets/AI Planet Logo.png";
+// import Logo from "../assets/AI Planet Logo.png";
 
 export default function Header({ onUpload, isUploading, uploadedFileName }) {
   const handleFileChange = (e) => {
@@ -23,11 +23,7 @@ export default function Header({ onUpload, isUploading, uploadedFileName }) {
           <div className="w-[104.93px] h-[41px]">
             {/* Replace with your actual logo or image */}
             <span className="font-inter font-semibold text-[18px] text-black">
-              <img
-                src={Logo}
-                alt="AI Planet Logo"
-                className="w-full h-full object-contain"
-              />
+              <h2 style={{color:"green"}}><b>ChatPDF</b></h2>
             </span>
           </div>
         </div>
@@ -80,11 +76,7 @@ export default function Header({ onUpload, isUploading, uploadedFileName }) {
         {/* Logo Section (Left) */}
         <div className="w-[104.93px] h-[41px]">
           <span className="font-inter font-semibold text-[18px] text-black">
-            <img
-              src={Logo}
-              alt="AI Planet Logo"
-              className="w-full h-full object-contain"
-            />
+            <h2 style={{color:"green"}}><b>ChatPDF</b></h2>
           </span>
         </div>
 

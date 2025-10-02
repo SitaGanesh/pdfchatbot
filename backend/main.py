@@ -1,28 +1,51 @@
-# backend/main.py
-
+# Python imports
+# used to handle file paths
 import os
+# creates the temporary file/folder for storing pdf
 import tempfile
+# regular expressions used for converting to specific text
 import re
+# used for code clarity, type hints
 from typing import Dict, List, Optional
 
+# framework imports
+# main app object, used to upload files, accept form data, handles exceptions, db injection sessions aand auth
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
+# communicates with frontend and backend
 from fastapi.middleware.cors import CORSMiddleware
+# sends structure json response to frontend
 from fastapi.responses import JSONResponse
+
+# database handles
+# sessions helps to connect and talk with postregsql db
 from sqlalchemy.orm import Session
 
+# pdf handlers
+# this reads and extracts text fom the pdf page by page
 import fitz  # PyMuPDF
+# used for verctor manipulation
 import numpy as np
+# high speed similarity search library used for store and search vector embeddings for semantic q and a
 import faiss
 
+# LangChain and NLP imports
+# used for splitting text to individual charater
 from langchain.text_splitter import CharacterTextSplitter
+# used for convertings chunks into vector embeddings using pre trained models
 from langchain_huggingface import HuggingFaceEmbeddings
+# used for huggingface for making model task easy access
 from transformers import pipeline
 
+# projec imports
+# used for local session creation when we wanted, connect sessions to actual db, class model
 from database import SessionLocal, engine, Base
+# ORM class that maps pdf table in the db
 from models import PDFDocument
 
+# this is SQLAlchemy command to create the tables which are define in the models and make connection to the postgresql
 Base.metadata.create_all(bind=engine)
 
+# this function used to make connection to the create db sessions when neede and returns a temorary session and ensures the connection is closed safely without memory leaks
 def get_db():
     db = SessionLocal()
     try:
@@ -30,9 +53,12 @@ def get_db():
     finally:
         db.close()
 
+# the variable for in memory storage with integer key and dictionary as the value containing the chunks,faiss index, embedding, this for avoiding the reprocessing the same pdf again and again
 knowledge_bases: Dict[int, Dict] = {}
 
+# creates a object used for defining the routers and working with apis
 app = FastAPI()
+# used for establishings the connection with frontend and backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -41,7 +67,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+# created a route which gives a json text on the specified route
 @app.get("/")
 async def root():
     return {"message": "PDF Chatbot API is running!"}
@@ -406,32 +432,20 @@ def ask_question(
     
     # Check for direct section matches first
     question_lc = question.lower()
+    context = None
     for heading_lc, section_text in sections_map.items():
         if heading_lc in question_lc:
-            # Detect explanation style and format accordingly
-            style = detect_explanation_style(question)
-            if style == "simple":
-                # Create a simple explanation prompt for section content
-                simple_prompt = create_explanation_prompt(section_text, question, "simple")
-                try:
-                    if pipeline_type == "text2text":
-                        output = qa_pipeline(simple_prompt, max_length=200, do_sample=True)[0]['generated_text']
-                    else:
-                        full_output = qa_pipeline(simple_prompt, max_new_tokens=150, do_sample=True)[0]['generated_text']
-                        output = full_output[len(simple_prompt):].strip()
-                    return JSONResponse(status_code=200, content={"answer": output.strip()})
-                except Exception as e:
-                    # Fallback to original section text if LLM fails
-                    return JSONResponse(status_code=200, content={"answer": section_text})
-            else:
-                return JSONResponse(status_code=200, content={"answer": section_text})
+            context = section_text
+            break
 
-    # Use FAISS for semantic search
-    retrieved_chunks = answer_question_faiss(kb_entry, question, top_k=3)
-    
+    if context is None:
+        # Use FAISS for semantic search
+        retrieved_chunks = answer_question_faiss(kb_entry, question, top_k=3)
+        context = retrieved_chunks[:1500]  # Limit context length
+
     # Detect explanation style
     style = detect_explanation_style(question)
-    prompt_text = create_explanation_prompt(retrieved_chunks[:1500], question, style)
+    prompt_text = create_explanation_prompt(context, question, style)
 
     try:
         if pipeline_type == "text2text":
