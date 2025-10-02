@@ -1,59 +1,51 @@
-# Hosting PDF Chatbot Application on Render (Free Tier)
+# Hosting PDF Chatbot Application
 
-## Prerequisites
+## Frontend Deployment (Already on Render)
+- Frontend is deployed on Render as a static site.
+- URL: https://pdfchatbot-frontend.onrender.com
+
+## Backend Deployment on Hugging Face Spaces (Free, ML-Supported)
+
+### Prerequisites
+- Hugging Face account (free at huggingface.co)
 - GitHub account
-- Render account (free at render.com)
 
-## Steps to Deploy
+### Steps to Deploy Backend
 
-1. **Push Code to GitHub**
-   - Commit all changes (Dockerfiles, docker-compose.yml)
-   - Push to a public GitHub repository
+1. **Prepare Backend for Spaces**
+   - Create a new file `backend/app.py` with the FastAPI app code (copy from `backend/main.py`)
+   - Ensure requirements.txt includes all dependencies (transformers, torch, etc.)
 
-2. **Deploy Backend on Render**
-   - Go to render.com and sign up/login
-   - Click "New" > "Web Service"
-   - Connect your GitHub account and select the repository
-   - Set the following:
-     - **Name**: pdfchatbot-backend
-     - **Environment**: Docker
-     - **Branch**: main (or your branch)
-     - **Build Command**: (leave default)
-     - **Start Command**: (leave default, uses Dockerfile CMD)
-   - Add environment variable: `DATABASE_URL=sqlite:///./fastapi_app.db`
-   - Click "Create Web Service"
+2. **Create a Hugging Face Space**
+   - Go to huggingface.co/spaces
+   - Click "Create new Space"
+   - Choose "Docker" as SDK (since you have Dockerfile)
+   - Name your space (e.g., pdf-chatbot-backend)
+   - Make it public
 
-3. **Deploy Frontend on Render**
-   - Click "New" > "Static Site"
-   - Connect the same GitHub repository
-   - Set the following:
-     - **Name**: pdfchatbot-frontend
-     - **Branch**: main
-     - **Build Command**: `npm run build`
-     - **Publish Directory**: `dist`
-   - Add environment variable: `VITE_API_URL=https://your-backend-service.onrender.com`
-     (Replace with the actual backend URL from step 2)
-   - Click "Create Static Site"
+3. **Connect to GitHub**
+   - In your Space settings, connect to your GitHub repo
+   - Point to the `backend/` folder or adjust paths
 
-4. **Update Frontend API URL**
-   - After backend is deployed, copy its URL
-   - Go to frontend static site settings and update `VITE_API_URL`
+4. **Deploy**
+   - Push changes to GitHub
+   - Spaces will auto-deploy using your Dockerfile
+   - Spaces provides persistent storage for models/indices
 
-5. **Access the Application**
-   - Frontend URL: Provided by Render static site
-   - Backend URL: Provided by Render web service
+5. **Configure Frontend**
+   - Update `frontend/.env` or Render env vars: `VITE_API_URL=https://your-username-pdf-chatbot-backend.hf.space`
+   - Redeploy frontend on Render
 
-6. **Test the Deployment**
-   - Visit the frontend URL
-   - Upload a PDF and test the chatbot
+6. **Test**
+   - Test API endpoints via the Spaces URL
+   - Ensure frontend communicates with backend
 
-## Notes
-- Render free tier includes 750 hours/month for web services and unlimited static sites
-- Apps may sleep after inactivity, causing slight delay on first load
-- For persistent data, consider using Render's managed databases (paid) or cloud storage
+### Notes
+- Free tier: Unlimited Spaces, 16GB RAM, 2 CPUs
+- Supports ML libraries natively
+- Apps may have cold starts
 
-## Troubleshooting
-- Check Render logs for build/deploy errors
-- Ensure Dockerfile CMD is correct
-- Verify environment variables are set correctly
-- If CORS issues, check backend CORS settings
+### Troubleshooting
+- Check Spaces build logs
+- Ensure Dockerfile is optimized for Spaces (use python:3.9-slim or similar)
+- For large models, consider model caching
