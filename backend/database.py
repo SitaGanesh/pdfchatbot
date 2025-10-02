@@ -9,6 +9,10 @@ from sqlalchemy.orm import sessionmaker
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:ganesh%40captainamerica@localhost/fastapi_db")
 # For SQLite fallback, you can set DATABASE_URL=sqlite:///./fastapi_app.db in .env or environment variables
 
+# Force SQLite for Hugging Face Spaces (free tier doesn't support PostgreSQL)
+if "hf.space" in os.getenv("SPACE_HOST", "") or os.getenv("SPACE_ID"):
+    DATABASE_URL = "sqlite:///./fastapi_app.db"
+
 # Create SQLAlchemy engine
 engine = create_engine(
     DATABASE_URL,

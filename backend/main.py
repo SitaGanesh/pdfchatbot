@@ -7,10 +7,6 @@ import tempfile
 import re
 # used for code clarity, type hints
 from typing import Dict, List, Optional
-# for sending emails
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 # framework imports
 # main app object, used to upload files, accept form data, handles exceptions, db injection sessions aand auth
@@ -78,40 +74,6 @@ async def root():
 
 
 # ---------------- HELPERS ----------------
-
-def send_session_reminder_email(mentor_email: str, student_email: str, session_time: str):
-    """
-    Send a Gmail reminder to both mentor and student about the session time.
-    """
-    sender_email = os.getenv("GMAIL_USER")
-    sender_password = os.getenv("GMAIL_PASSWORD")
-
-    if not sender_email or not sender_password:
-        print("Gmail credentials not set")
-        return
-
-    subject = "Session Reminder"
-    body = f"Your session is scheduled at {session_time}."
-
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = mentor_email
-    msg['Subject'] = subject
-
-    msg.attach(MIMEText(body, 'plain'))
-
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        text = msg.as_string()
-        server.sendmail(sender_email, mentor_email, text)
-        server.sendmail(sender_email, student_email, text)
-        server.quit()
-        print("Emails sent successfully")
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-
 
 def pdf_to_text(path: str) -> str:
     """
@@ -336,8 +298,8 @@ qa_prompt = PromptTemplate(
 try:
     # Option 1: Use T5 with text2text-generation pipeline
     qa_pipeline = pipeline(
-        "text2text-generation",
-        model="google/flan-t5-small",
+        "text2text-generation", 
+        model="google/flan-t5-base", 
         max_new_tokens=200,
         do_sample=True,
         temperature=0.3
